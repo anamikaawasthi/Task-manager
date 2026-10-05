@@ -14,7 +14,7 @@ import {
 
 const router = express.Router()
 
-router.post("/create", verifyToken, adminOnly, createTask)
+router.post("/create", verifyToken,createTask)
 
 router.get("/", verifyToken, getTasks)
 

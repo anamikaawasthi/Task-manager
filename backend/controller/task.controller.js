@@ -1,7 +1,6 @@
 import mongoose from "mongoose"
 import Task from "../models/task.model.js"
 import { errorHandler } from "../utils/error.js"
-
 export const createTask = async (req, res, next) => {
   try {
     const {
@@ -14,8 +13,20 @@ export const createTask = async (req, res, next) => {
       todoChecklist,
     } = req.body
 
-    if (!Array.isArray(assignedTo)) {
-      return next(errorHandler(400, "assignedTo must be an array of user IDs"))
+    let taskAssignedTo
+
+    // Admin can assign task to other users
+    if (req.user.role === "admin") {
+      if (!Array.isArray(assignedTo) || assignedTo.length === 0) {
+        return next(errorHandler(400, "Please select a user"))
+      }
+
+      taskAssignedTo = assignedTo
+    }
+
+    // Normal user automatically gets the task assigned to themselves
+    else {
+      taskAssignedTo = [req.user.id]
     }
 
     const task = await Task.create({
@@ -23,17 +34,53 @@ export const createTask = async (req, res, next) => {
       description,
       priority,
       dueDate,
-      assignedTo,
+      assignedTo: taskAssignedTo,
       attachments,
       todoChecklist,
       createdBy: req.user.id,
     })
 
-    res.status(201).json({ message: "Task created successfully", task })
+    res.status(201).json({
+      message: "Task created successfully",
+      task,
+    })
   } catch (error) {
     next(error)
   }
 }
+
+// export const createTask = async (req, res, next) => {
+//   try {
+//     const {
+//       title,
+//       description,
+//       priority,
+//       dueDate,
+//       assignedTo,
+//       attachments,
+//       todoChecklist,
+//     } = req.body
+
+//     if (!Array.isArray(assignedTo)) {
+//       return next(errorHandler(400, "assignedTo must be an array of user IDs"))
+//     }
+
+//     const task = await Task.create({
+//       title,
+//       description,
+//       priority,
+//       dueDate,
+//       assignedTo,
+//       attachments,
+//       todoChecklist,
+//       createdBy: req.user.id,
+//     })
+
+//     res.status(201).json({ message: "Task created successfully", task })
+//   } catch (error) {
+//     next(error)
+//   }
+// }
 
 export const getTasks = async (req, res, next) => {
   try {

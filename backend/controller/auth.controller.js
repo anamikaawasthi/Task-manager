@@ -4,7 +4,14 @@ import { errorHandler } from "../utils/error.js"
 import jwt from "jsonwebtoken"
 
 export const signup = async (req, res, next) => {
-  const { name, email, password, profileImageUrl, adminJoinCode } = req.body
+  const { 
+    name, 
+    email, 
+    password, 
+    profileImageUrl, 
+    adminJoinCode,
+    role: requestedRole,
+   } = req.body
 
   if (
     !name ||
@@ -24,12 +31,28 @@ export const signup = async (req, res, next) => {
     return next(errorHandler(400, "User already exists"))
   }
 
-  //   check user role
-  let role = "user"
+  // Check requested user role
+let role = "user"
 
-  if (adminJoinCode && adminJoinCode === process.env.ADMIN_JOIN_CODE) {
-    role = "admin"
+if (requestedRole === "admin") {
+  if (
+    !adminJoinCode ||
+    adminJoinCode !== process.env.ADMIN_JOIN_CODE
+  ) {
+    return next(
+      errorHandler(403, "Invalid admin invite token")
+    )
   }
+
+  role = "admin" //adminJoinCode: "AdminProject2026"
+}
+
+  //   check user role
+  // let role = "user"
+
+  // if (adminJoinCode && adminJoinCode === process.env.ADMIN_JOIN_CODE) {
+  //   role = "admin"
+  // }
 
   const hashedPassword = bcryptjs.hashSync(password, 10)
 

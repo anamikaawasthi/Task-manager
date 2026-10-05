@@ -19,7 +19,8 @@ const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null)
   const [adminInviteToken, setAdminInviteToken] = useState("")
   const [showAdminInviteToken, setShowAdminInviteToken] = useState(false)
-
+  const [role, setRole] = useState("user")
+  
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -55,6 +56,7 @@ const SignUp = () => {
         email,
         password,
         profileImageUrl,
+        role,
         adminJoinCode: adminInviteToken,
       })
 
@@ -169,7 +171,74 @@ const SignUp = () => {
                 </div>
               </div>
 
+
               <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Register As
+  </label>
+
+  <div className="flex gap-6">
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        name="role"
+        value="user"
+        checked={role === "user"}
+        onChange={() => {
+          setRole("user")
+          setAdminInviteToken("")
+        }}
+      />
+      <span>User</span>
+    </label>
+
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="radio"
+        name="role"
+        value="admin"
+        checked={role === "admin"}
+        onChange={() => setRole("admin")}
+      />
+      <span>Admin</span>
+    </label>
+  </div>
+</div>
+
+      {role === "admin" && (
+    <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Admin Invite Token
+    </label>
+
+    <div className="relative">
+      <input
+        id="adminInviteToken"
+        type={showAdminInviteToken ? "text" : "password"}
+        value={adminInviteToken}
+        onChange={(e) => setAdminInviteToken(e.target.value)}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+        placeholder="Enter admin invite token"
+        required
+      />
+
+      <button
+        type="button"
+        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+        onClick={() =>
+          setShowAdminInviteToken(!showAdminInviteToken)
+        }
+      >
+        {showAdminInviteToken ? <FaEyeSlash /> : <FaEye />}
+      </button>
+    </div>
+  </div>
+)}    
+
+
+              
+
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Admin Invite Token
                 </label>
@@ -195,7 +264,7 @@ const SignUp = () => {
                     {showAdminInviteToken ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {error && <p className="text-red-500 text-sm">{error}</p>}
 

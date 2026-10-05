@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
 import DashboardLayout from "../../components/DashboardLayout"
 import { MdDelete } from "react-icons/md"
 import DatePicker from "react-datepicker"
@@ -19,6 +20,8 @@ const CreateTask = () => {
   const { taskId } = location.state || {}
 
   const navigate = useNavigate()
+   const { currentUser } = useSelector((state) => state.user)
+  const isAdmin = currentUser?.role === "admin"
 
   const [taskData, setTaskData] = useState({
     title: "",
@@ -95,11 +98,26 @@ const CreateTask = () => {
         }
       })
 
-      const response = await axiosInstance.put(`/tasks/${taskId}`, {
-        ...taskData,
-        dueDate: new Date(taskData.dueDate).toISOString(),
-        todoChecklist: todolist,
-      })
+      const taskPayload = {
+  ...taskData,
+  dueDate: new Date(taskData.dueDate).toISOString(),
+  todoChecklist: todolist,
+}
+
+if (!isAdmin) {
+  delete taskPayload.assignedTo
+}
+
+const response = await axiosInstance.post(
+  "/tasks/create",
+  taskPayload
+)
+
+      // const response = await axiosInstance.put(`/tasks/${taskId}`, {
+      //   ...taskData,
+      //   dueDate: new Date(taskData.dueDate).toISOString(),
+      //   todoChecklist: todolist,
+      // })
 
       toast.success("Task updated successfully!")
 
@@ -127,11 +145,15 @@ const CreateTask = () => {
       setError("Due date is required!")
       return
     }
-
-    if (taskData.assignedTo?.length === 0) {
-      setError("Task is not assigned to any member!")
-      return
+    if (isAdmin && taskData.assignedTo?.length === 0) {
+     setError("Please assign the task to at least one user!")
+     return
     }
+
+    // if (taskData.assignedTo?.length === 0) {
+    //   setError("Task is not assigned to any member!")
+    //   return
+    // }
 
     if (taskData.todoChecklist?.length === 0) {
       setError("Add atleast one todo task!")
@@ -291,7 +313,22 @@ const CreateTask = () => {
                 </div>
               </div>
 
-              <div>
+              {isAdmin && (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Assign To
+    </label>
+
+    <SelectedUsers
+      selectedUser={taskData.assignedTo}
+      setSelectedUser={(value) =>
+        handleValueChange("assignedTo", value)
+      }
+    />
+  </div>
+)}
+
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Assign To
                 </label>
@@ -302,7 +339,7 @@ const CreateTask = () => {
                     handleValueChange("assignedTo", value)
                   }
                 />
-              </div>
+              </div> */}
 
               <div className="mt-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
