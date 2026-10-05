@@ -74,6 +74,12 @@ const UserDashboard = () => {
                 {moment().format("dddd Do MMMM YYYY")}
               </p>
             </div>
+            <button
+  onClick={() => navigate("/user/create-task")}
+  className="mt-4 md:mt-0 px-5 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition"
+>
+  + Create Task
+</button>
           </div>
         </div>
 
